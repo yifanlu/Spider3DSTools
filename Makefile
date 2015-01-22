@@ -5,6 +5,7 @@ LD=arm-none-eabi-gcc
 LDFLAGS=-T linker.x -nodefaultlibs -nostdlib -pie
 OBJCOPY=arm-none-eabi-objcopy
 OBJCOPYFLAGS=
+DATSIZE=0x300
 
 all: code.bin LoadROP.dat LoadCode.dat MemoryDump.dat
 
@@ -21,7 +22,7 @@ all: code.bin LoadROP.dat LoadCode.dat MemoryDump.dat
 	$(OBJCOPY) -O binary $^ $@
 
 %.dat: %.ro
-	$(OBJCOPY) -O binary $^ $@
+	$(OBJCOPY) --pad-to $(DATSIZE) -O binary $^ $@
 
 .PHONY: clean
 
