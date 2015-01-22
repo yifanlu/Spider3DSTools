@@ -70,6 +70,8 @@ uvl_entry ()
         svcSleepThread (0x400000LL);
     }
 
+    svcSleepThread (0x6fc23ac00LL); // wait 30 seconds
+
     return 0;
 }
 
