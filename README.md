@@ -53,3 +53,8 @@ is placed. If you add/remove code, you must reposition all the InitData so it
 is at the sample place. Additionally, you must make sure the ROP script is 
 exactly 0x300 bytes long. If anyone has a way to automate this, please send a 
 pull request.
+
+## Thanks
+
+* smea for ROP gadgets used in LoadCode
+* WinterMute for ROP boilerplate code and inspiration for MemoryDump
