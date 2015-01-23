@@ -20,7 +20,7 @@ int main(int argc, const char *argv[])
 
 	while (fread(&data, 2, 1, file) == 1)
 	{
-		fprintf(stdout, "\\u%04x", data);
+		printf("\\u%04x", data);
 	}
 	fclose(file);
 	return 0;
