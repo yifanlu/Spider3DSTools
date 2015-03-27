@@ -1,11 +1,10 @@
 CC=arm-none-eabi-gcc
 CFLAGS=-fPIE -fno-zero-initialized-in-bss -std=c99 -mcpu=mpcore -fshort-wchar -O3
 ASFLAGS=-nostartfiles -nostdlib
-LD=arm-none-eabi-gcc
-LDFLAGS=-T linker.x -nodefaultlibs -nostdlib -pie
+LD=arm-none-eabi-ld
+LDFLAGS=-nostdlib
 OBJCOPY=arm-none-eabi-objcopy
 OBJCOPYFLAGS=
-DATSIZE=0x300
 
 all: code.bin LoadROP.dat LoadCode.dat MemoryDump.dat
 
@@ -16,13 +15,16 @@ all: code.bin LoadROP.dat LoadCode.dat MemoryDump.dat
 	$(CC) -c -o $@ $< $(ASFLAGS)
 
 %.elf: %.o
-	$(LD) -o $@ $^ $(LDFLAGS)
+	$(LD) -o $@ $^ -T rop.x $(LDFLAGS)
+
+code.elf: code.o
+	$(LD) -o $@ $^ -T uvl.x $(LDFLAGS)
 
 %.bin: %.elf
 	$(OBJCOPY) -O binary $^ $@
 
-%.dat: %.ro
-	$(OBJCOPY) --pad-to $(DATSIZE) -O binary $^ $@
+%.dat: %.elf
+	$(OBJCOPY) -S -O binary $^ $@
 
 .PHONY: clean
 

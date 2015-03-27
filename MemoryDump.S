@@ -1,7 +1,6 @@
 	.arm
-	.text
+	.section .rodata
 
-#define SELF_LOC 	0x08B88400
 #define DUMPSTART 	0x00100000
 #define DUMPSIZE	0x00300000
 
@@ -17,8 +16,8 @@ _start:
 			.word 0xDEADBEEF @ R5, dummy
 	@ open file
 		.word 0x001946EB @ POP     {R0-R4,R7,PC}
-			.word SELF_LOC+FILE @ R0 = this
-			.word SELF_LOC+FileName @ R1 = filename
+			.word FILE @ R0 = this
+			.word FileName @ R1 = filename
 			.word 0x00000006 @ R2 = permission
 			.word 0xDEADBEEF @ R3, dummy
 			.word 0xDEADBEEF @ R4, dummy
@@ -31,8 +30,8 @@ _start:
 		.word 0x001057C4 @ POP {PC}
 	@ read memory
 		.word 0x001946EB @ POP     {R0-R4,R7,PC}
-			.word SELF_LOC+FILE @ R0 = this
-			.word SELF_LOC+FILE + 32 @ R1 = written
+			.word FILE @ R0 = this
+			.word FILE + 32 @ R1 = written
 			.word DUMPSTART @ R2 = buffer
 			.word DUMPSIZE @ R3 = size
 			.word 0xDEADBEEF @ R4, dummy
@@ -49,16 +48,18 @@ _start:
 	@ exit
 		.word 0xDEADBEEF
 
+	.section .rodata.init
 InitData:
 	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	.word 0, SELF_LOC+_start+0x8C, 0, 0, 0, 0, 0
-	.word 0, 0, 0, 0, 0, 0, 0, SELF_LOC+_start, 0x001057C4, 0x001057C4, 0, 0, 0, 0, 0, 0
-	.word 0, 0, 0, 0x0010C2FC, SELF_LOC+_start+0x218, 0, 0, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0
+	.word 0, _start+0x8C, 0, 0, 0, 0, 0
+	.word 0, 0, 0, 0, 0, 0, 0, _start, 0x001057C4, 0x001057C4, 0, 0, 0, 0, 0, 0
+	.word 0, 0, 0, 0x0010C2FC, _start+0x218, 0, 0, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0
 	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 Self:
-	.word SELF_LOC+Self, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0x00130344, 0, 0, 0, 0, 0
+	.word Self, 0x001057C4, 0, 0, 0, 0, 0, 0, 0, 0x00130344, 0, 0, 0, 0, 0
 
+	.section .rodata
 	.align 2
 FileName:
 	.string16 "dmc:/memory.bin"

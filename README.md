@@ -48,11 +48,9 @@ example).
 ## On spider ROP payloads
 
 There are specific data at specific offsets that spider must see for the ROP to 
-work. If you look in any of the example ROP scripts, you'll see where the data 
-is placed. If you add/remove code, you must reposition all the InitData so it 
-is at the same place. Additionally, you must make sure the ROP script is 
-exactly 0x300 bytes long. If anyone has a way to automate this, please send a 
-pull request.
+work. If you look in any of the example linker script, you'll see where the data 
+is placed. Additionaly, you must make sure the ROP script is exactly 0x300 bytes 
+long.
 
 ## Thanks
 
