@@ -30,6 +30,7 @@ typedef unsigned int u32_t;
 #define EC_URL_1_OFFSET 0x0//0x710E1BC
 #define EC_URL_2_OFFSET 0x377//0x710E533
 #define NU_URL_1_OFFSET 0x338//0x710E4F4
+#define NIM_UPDATE_PATCH 0xfb6c//0x711DD28
 
 #define EC_URL "https://ecs.c.shop.nintendowifi.net/ecs/services/ECommerceSOAP"
 #define EC_URL_REPLACE "http://myip/ECommerceSOAP"
@@ -379,6 +380,7 @@ patch_nim (void)
         memcpy_(*(char**)0x18410000+EC_URL_1_OFFSET, EC_URL_REPLACE, sizeof(EC_URL_REPLACE));
         memcpy_(*(char**)0x18410000+EC_URL_2_OFFSET, EC_URL_REPLACE, sizeof(EC_URL_REPLACE));
         memcpy_(*(char**)0x18410000+NU_URL_1_OFFSET, NU_URL_REPLACE, sizeof(NU_URL_REPLACE));
+        memcpy_(*(char**)0x18410000+NIM_UPDATE_PATCH, nim_no_update, sizeof(nim_no_update));
     }
     *(char**)0x18410000 = memstr(FCRAM_BASE_START, FCRAM_BASE_SIZE, NA_URL, sizeof(NA_URL));
     if (*(char**)0x18410000)
@@ -446,8 +448,6 @@ uvl_entry ()
     */
 
     //while (1);
-
-    svcSleepThread (0x6fc23ac00LL); // wait 30 seconds
 
     return 0;
 }
