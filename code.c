@@ -32,8 +32,12 @@ typedef unsigned int u32_t;
 #define NU_URL_1_OFFSET 0x338//0x710E4F4
 
 #define EC_URL "https://ecs.c.shop.nintendowifi.net/ecs/services/ECommerceSOAP"
-#define EC_URL_REPLACE "http://mysite.com/ECommerceSOAP"
-#define NU_URL_REPLACE "http://mysite.com/NetUpdateSOAP"
+#define EC_URL_REPLACE "http://myip/ECommerceSOAP"
+#define NU_URL_REPLACE "http://myip/NetUpdateSOAP"
+#define NA_URL "https://%s%saccount.nintendo.net/v1/api/"
+#define NA_URL_REPLACE "http://myip/%s%sa/"
+
+const char nim_no_update[] = {0x00, 0x20, 0x08, 0x60, 0x70, 0x47};
 
 int (*IFile_Open)(void *this, const short *path, int flags) = 0x0022FE08;
 int (*IFile_Write)(void *this, unsigned int *written, void *src, unsigned int len) = 0x00168764;
@@ -375,6 +379,11 @@ patch_nim (void)
         memcpy_(*(char**)0x18410000+EC_URL_1_OFFSET, EC_URL_REPLACE, sizeof(EC_URL_REPLACE));
         memcpy_(*(char**)0x18410000+EC_URL_2_OFFSET, EC_URL_REPLACE, sizeof(EC_URL_REPLACE));
         memcpy_(*(char**)0x18410000+NU_URL_1_OFFSET, NU_URL_REPLACE, sizeof(NU_URL_REPLACE));
+    }
+    *(char**)0x18410000 = memstr(FCRAM_BASE_START, FCRAM_BASE_SIZE, NA_URL, sizeof(NA_URL));
+    if (*(char**)0x18410000)
+    {
+        memcpy_(*(char**)0x18410000, NA_URL_REPLACE, sizeof(NA_URL_REPLACE));
     }
 
     /*
