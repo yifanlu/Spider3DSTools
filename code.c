@@ -447,6 +447,8 @@ uvl_entry ()
 
     //while (1);
 
+    svcSleepThread (0x6fc23ac00LL); // wait 30 seconds
+
     return 0;
 }
 
